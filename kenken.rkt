@@ -165,5 +165,9 @@ example DivisionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
 
 run {
     isWellFormedIdx
-    all c: Cage | isWellFormedCage[c]
-} for exactly 1 Cage, 0 Solution, 0 Board
+    all b: Board {
+        isWellFormedBoard[b]
+        all c: Cage | c in b.cages
+    }
+    Addition + Subtraction + Multiplication + Division in Cage.operation
+} for exactly 1 Board, 0 Solution, 6 Int
