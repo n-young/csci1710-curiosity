@@ -39,31 +39,6 @@ one sig Division extends Operation {}
 -- PREDICATES
 -- ====================================================================
 
-pred isWellFormedSolution[soln: Solution] {
-    -- Board is well formed.
-    isWellFormedBoard[soln.board]
-    -- Board cells equal to the solution cells TODO: Get rid of int column
-    soln.board.cages.cells = soln.values
-    -- assert all cells have a value in [1, n]
-    all row: Idx | #(soln.values.row.Idx) = #(Idx)
-    all col: Idx | #(soln.values.Idx.col) = #(Idx)
-    all row: Idx | all col:Idx |
-        sol.values.row.col <= #(Idx) and sol.values.row.col > 0
-}
-
-pred isSolvedSolution[soln: Solution] {
-    -- assert all cells are satisfied
-}
-
-pred isWellFormedBoard[board: Board] {
-    all cage: Cage | cage in board.cages implies {
-        isWellFormedCage[cage]
-    }
-    all row: Idx | all col: Idx {
-        one cells.col.row & board.cages
-    }
-}
-
 pred isWellFormedCage[cage: Cage] {
     -- assert all cells are adjacent; if sub or div, max 2 cells
     some cage.cells
@@ -76,20 +51,35 @@ pred isWellFormedCage[cage: Cage] {
     #(cage.cells) = 1 implies cage.operation in Addition
 }
 
+pred isWellFormedBoard[board: Board] {
+    all cage: Cage | cage in board.cages implies {
+        isWellFormedCage[cage]
+    }
+    all row: Idx | all col: Idx {
+        one cells.col.row & board.cages
+    }
+}
+
+pred isWellFormedSolution[soln: Solution] {
+    -- Board is well formed.
+    isWellFormedBoard[soln.board]
+    -- Board cells equal to the solution cells TODO: Get rid of int column
+    soln.board.cages.cells = soln.values
+    -- assert all cells have a value in [1, n]
+    all row: Idx | #(soln.values.row.Idx) = #(Idx)
+    all col: Idx | #(soln.values.Idx.col) = #(Idx)
+    all row: Idx | all col:Idx |
+        sol.values.row.col <= #(Idx) and sol.values.row.col > 0
+}
+
+
 pred isSolvedCage[cage: Cage, soln: Solution] {
     -- assert evaluateCage[Cage, Solution] == result
 }
 
-
-
--- ====================================================================
--- TESTS (isWellFormedSolution)
--- ====================================================================
-
-example StandardSolution is {all soln: Solution | isWellFormedSolution[solution]} for {
-    ...
+pred isSolvedSolution[soln: Solution] {
+    -- assert all cells are satisfied
 }
-
 -- ====================================================================
 -- TESTS (isWellFormedCage)
 -- ====================================================================
@@ -147,6 +137,26 @@ example DivisionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
     cells = Cage0->I10->I10 + Cage0->I20->I10 + Cage0->I10->I20
     result = Cage0->sing[7]
 }
+
+
+-- ====================================================================
+-- TESTS (isWellFormedBoard)
+-- ====================================================================
+
+
+-- ====================================================================
+-- TESTS (isWellFormedSolution)
+-- ====================================================================
+
+
+-- ====================================================================
+-- TESTS (isSolvedCage)
+-- ====================================================================
+
+
+-- ====================================================================
+-- TESTS (isSolvedSolution)
+-- ====================================================================
 
 
 -- ====================================================================
