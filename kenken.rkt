@@ -39,22 +39,36 @@ one sig Division extends Operation {}
 -- PREDICATES
 -- ====================================================================
 
-pred isWellFormedSolution[soln: Solution] {} -- assert all cells have a value in [1, n]
-pred isSolvedSolution[soln: Solution] {} -- assert all cells are satisfied
-pred isWellFormedBoard[board: Board] {} -- assert all cages are valid, all cells are in exactly one cage
-pred isWellFormedCage[cage: Cage] { -- assert all cells are adjacent; if sub or div, max 2 cells
-some cage.cells
-all row: Idx | all col: Idx | row->col in cage.cells implies {
-    some Cage.cells & (row->col.neighbor + row->neighbor.col + row.neighbor->col + neighbor.row->col)
+pred isWellFormedSolution[soln: Solution] {
+    -- assert all cells have a value in [1, n]
 }
-cage.operation in Subtraction + Division implies #(cage.cells) = 2
-}
-pred isSolvedCage[cage: Cage, soln: Solution] {} -- assert evaluateCage[Cage, Solution] == result
 
-run { isWellFormedIdx all c: Cage | isWellFormedCage[c] } for exactly 1 Cage, 0 Solution, 0 Board
+pred isSolvedSolution[soln: Solution] {
+    -- assert all cells are satisfied
+}
+
+pred isWellFormedBoard[board: Board] {
+    -- assert all cages are valid, all cells are in exactly one cage
+}
+
+pred isWellFormedCage[cage: Cage] {
+    -- assert all cells are adjacent; if sub or div, max 2 cells
+    some cage.cells
+    all row: Idx | all col: Idx | row->col in cage.cells implies {
+        some Cage.cells & (row->col.neighbor + row->neighbor.col + row.neighbor->col + neighbor.row->col)
+    }
+    cage.operation in Subtraction + Division implies #(cage.cells) = 2
+}
+
+pred isSolvedCage[cage: Cage, soln: Solution] {
+    -- assert evaluateCage[Cage, Solution] == result
+}
+
+run {
+    isWellFormedIdx
+    all c: Cage | isWellFormedCage[c]
+} for exactly 1 Cage, 0 Solution, 0 Board
 
 -- ====================================================================
 -- TESTS
 -- ====================================================================
-
--- fun evaluateCage[Cage, Solution] -> Int
