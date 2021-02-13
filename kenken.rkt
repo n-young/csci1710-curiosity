@@ -67,31 +67,57 @@ pred isSolvedCage[cage: Cage, soln: Solution] {
 -- TESTS (isWellFormedCage)
 -- ====================================================================
 
-example StandardCage is {isWellFormedCage[Cage]} for {
-    I1 = I10
-    I2 = I20
-    I3 = I30
-    I4 = I40
-    neighbor = I1->I2 + I2->I3 + I3->I4
+-- Test on a 1x2 cage.
+inst StandardCage1Inst {
+    neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
-    Multiplication = Multiplication0
     operation = Cage0->Multiplication0
     cells = Cage0->I10->I10 + Cage0->I20->I10
     result = Cage0->7
 }
+example StandardCage1 is {all cage: Cage | isWellFormedCage[cage]} for StandardCage1Inst
 
-inst TestCage {
-    I1 = I10
-    I2 = I20
-    I3 = I30
-    I4 = I40
-    neighbor = I1->I2 + I2->I3 + I3->I4
+-- Test on a 4-square cage.
+inst StandardCage2Inst {
+    neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
-    Multiplication = Multiplication0
     operation = Cage0->Multiplication0
-    cells = Cage0->I10->I10 + Cage0->I20->I10
+    cells = Cage0->I10->I10 + Cage0->I20->I10 + Cage0->I10->I20 + Cage0->I10->I30
     result = Cage0->7
 }
+example StandardCage2 is {all cage: Cage | isWellFormedCage[cage]} for StandardCage2Inst
+
+-- Test on a disconnected cage (1,1) + (2, 2)
+inst DisconnectedInst {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Multiplication0
+    cells = Cage0->I10->I10 + Cage0->I20->I20
+    result = Cage0->7
+}
+example Disconnected is {some cage: Cage | not isWellFormedCage[cage]} for DisconnectedInst
+
+-- Test that subtraction can't be too big
+inst BigSubtractionInst {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Subtraction0
+    cells = Cage0->I10->I10 + Cage0->I20->I10 + Cage0->I10->I20
+    result = Cage0->7
+}
+example Disconnected is {some cage: Cage | not isWellFormedCage[cage]} for DisconnectedInst
+
+-- Test that division can't be too big
+inst BigDivisionInst {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Division0
+    cells = Cage0->I10->I10 + Cage0->I20->I10 + Cage0->I10->I20
+    result = Cage0->7
+}
+example Disconnected is {some cage: Cage | not isWellFormedCage[cage]} for DisconnectedInst
+
+
 
 run {
     isWellFormedIdx
