@@ -55,7 +55,7 @@ pred isWellFormedCage[cage: Cage] {
     -- assert all cells are adjacent; if sub or div, max 2 cells
     some cage.cells
     all row: Idx | all col: Idx | row->col in cage.cells implies {
-        some Cage.cells & (row->col.neighbor + row->neighbor.col + row.neighbor->col + neighbor.row->col)
+        some cage.cells & (row->(col.neighbor) + row->(neighbor.col) + (row.neighbor)->col + (neighbor.row)->col)
     }
     cage.operation in Subtraction + Division implies #(cage.cells) = 2
 }
@@ -63,12 +63,37 @@ pred isWellFormedCage[cage: Cage] {
 pred isSolvedCage[cage: Cage, soln: Solution] {
     -- assert evaluateCage[Cage, Solution] == result
 }
+-- ====================================================================
+-- TESTS (isWellFormedCage)
+-- ====================================================================
+
+example StandardCage is {isWellFormedCage[Cage]} for {
+    I1 = I10
+    I2 = I20
+    I3 = I30
+    I4 = I40
+    neighbor = I1->I2 + I2->I3 + I3->I4
+    Cage = Cage0
+    Multiplication = Multiplication0
+    operation = Cage0->Multiplication0
+    cells = Cage0->I10->I10 + Cage0->I20->I10
+    result = Cage0->7
+}
+
+inst TestCage {
+    I1 = I10
+    I2 = I20
+    I3 = I30
+    I4 = I40
+    neighbor = I1->I2 + I2->I3 + I3->I4
+    Cage = Cage0
+    Multiplication = Multiplication0
+    operation = Cage0->Multiplication0
+    cells = Cage0->I10->I10 + Cage0->I20->I10
+    result = Cage0->7
+}
 
 run {
     isWellFormedIdx
     all c: Cage | isWellFormedCage[c]
 } for exactly 1 Cage, 0 Solution, 0 Board
-
--- ====================================================================
--- TESTS
--- ====================================================================
