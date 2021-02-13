@@ -18,7 +18,7 @@ Cage.atoms().forEach((cage, i) => {
     const rowIdx = idxToInt(row),
       colIdx = idxToInt(col)
     if (cageArray[rowIdx][colIdx] != null) {
-      throw new Error(`Dupe at ${rowIdx}, ${colIdx}`)
+      throw new Error(`Dupe at ${rowIdx + 1}, ${colIdx + 1}: Cage${i} and Cage${cageArray[rowIdx][colIdx].i}`)
     }
     debugger
     cageArray[rowIdx][colIdx] = { i, op: labels.get(unwrap(cage.join(operation))) }
