@@ -1,1 +1,2 @@
-# csci1710-curiosity
+# Curiosity Modelling - KenKen
+Jed Fox and Nick Young
