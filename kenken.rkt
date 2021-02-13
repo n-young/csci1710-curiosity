@@ -8,11 +8,7 @@ abstract sig Idx {
     neighbor: lone Idx
 }
 one sig I1, I2, I3, I4 extends Idx {}
-
-pred isWellFormedIdx {
-    neighbor = I1->I2 + I2->I3 + I3->I4
-}
-
+pred isWellFormedIdx { neighbor = I1->I2 + I2->I3 + I3->I4 }
 
 sig Board {
     cages: set Cage
@@ -40,15 +36,16 @@ one sig Division extends Operation {}
 -- ====================================================================
 
 pred isWellFormedCage[cage: Cage] {
-    -- assert all cells are adjacent; if sub or div, max 2 cells
+    -- There are at least some cells
     some cage.cells
-    all row: Idx | all col: Idx | row->col in cage.cells implies {
-        some cage.cells & (row->(col.neighbor) + row->(neighbor.col) + (row.neighbor)->col + (neighbor.row)->col)
-    }
-    -- If subtraction or division, must be size 2
-    cage.operation in Subtraction + Division implies #(cage.cells) = 2
     -- If a singleton, must be addition
     #(cage.cells) = 1 implies cage.operation in Addition
+    -- assert all cells are adjacent; if sub or div, max 2 cells
+    #(cage.cells) > 1 implies {all row: Idx | all col: Idx | row->col in cage.cells implies {
+        some cage.cells & (row->(col.neighbor) + row->(neighbor.col) + (row.neighbor)->col + (neighbor.row)->col)
+    }}
+    -- If subtraction or division, must be size 2
+    cage.operation in Subtraction + Division implies #(cage.cells) = 2
 }
 
 pred isWellFormedBoard[board: Board] {
@@ -90,25 +87,15 @@ example StandardCage1 is {all cage: Cage | isWellFormedCage[cage]} for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
-    cells = Cage0->I10->I10 + Cage0->I20->I10
+    cells = Cage0->(I10->I10 + I20->I10)
     result = Cage0->sing[7]
 }
-
--- Test on a 1x2 cage.
-example StandardCage1 is {all cage: Cage | isWellFormedCage[cage]} for {
-    neighbor = I10->I20 + I20->I30 + I30->I40
-    Cage = Cage0
-    operation = Cage0->Multiplication0
-    cells = Cage0->I10->I10 + Cage0->I20->I10
-    result = Cage0->sing[7]
-}
-
 -- Test on a 4-square cage.
 example StandardCage2 is {all cage: Cage | isWellFormedCage[cage]} for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
-    cells = Cage0->I10->I10 + Cage0->I20->I10 + Cage0->I10->I20 + Cage0->I10->I30
+    cells = Cage0->(I10->I10 + I20->I10 + I10->I20 + I10->I30)
     result = Cage0->sing[7]
 }
 
@@ -117,7 +104,7 @@ example Disconnected is {some cage: Cage | not isWellFormedCage[cage]} for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
-    cells = Cage0->I10->I10 + Cage0->I20->I20
+    cells = Cage0->(I10->I10 + I20->I20)
     result = Cage0->sing[7]
 }
 
@@ -126,7 +113,7 @@ example SubtractionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Subtraction0
-    cells = Cage0->I10->I10 + Cage0->I20->I10 + Cage0->I10->I20
+    cells = Cage0->(I10->I10 + I20->I10 + I10->I20)
     result = Cage0->sing[7]
 }
 
@@ -135,15 +122,27 @@ example DivisionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Division0
-    cells = Cage0->I10->I10 + Cage0->I20->I10 + Cage0->I10->I20
+    cells = Cage0->(I10->I10 + I20->I10 + I10->I20)
     result = Cage0->sing[7]
 }
-
 
 -- ====================================================================
 -- TESTS (isWellFormedBoard)
 -- ====================================================================
 
+-- 4x4 normal board
+example NormalBoard is {all board: Board | isWellFormedBoard[board]} for {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
+    operation = Cage0->Division0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Subtraction0
+    + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
+    cells = Cage0->(I10->I10 + I10->I20) + Cage1->(I10->I30 + I20->I30) + Cage2->I10->I40
+    + Cage3->(I20->I10 + I30->I10) + Cage4->(I20->I20 + I30->I20) + Cage5->(I30->I30 + I40->I30 + I40->I40)
+    + Cage6->(I20->I40 + I30->I40) + Cage7->(I40->I10 + I40->I20)
+    result = Cage0->sing[2] + Cage1->sing[7] + Cage2->sing[4] + Cage3->sing[1] + Cage4->sing[3]
+    + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
+}
 
 -- ====================================================================
 -- TESTS (isSolution)
