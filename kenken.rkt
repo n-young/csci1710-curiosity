@@ -63,8 +63,8 @@ pred isWellFormedBoard[board: Board] {
 pred isWellFormedSolution[soln: Solution] {
     -- Board is well formed.
     isWellFormedBoard[soln.board]
-    -- Board cells equal to the solution cells TODO: Get rid of int column
-    soln.board.cages.cells = soln.values
+    -- Board cells equal to the solution cells
+    soln.board.cages.cells = soln.values.Int
     -- assert all cells have a value in [1, n]
     all row: Idx | #(soln.values.row.Idx) = #(Idx)
     all col: Idx | #(soln.values.Idx.col) = #(Idx)
