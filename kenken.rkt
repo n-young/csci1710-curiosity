@@ -48,7 +48,12 @@ pred isSolvedSolution[soln: Solution] {
 }
 
 pred isWellFormedBoard[board: Board] {
-    -- assert all cages are valid, all cells are in exactly one cage
+    all cage: Cage | cage in board.cages implies {
+        isWellFormedCage[cage]
+    }
+    all row: Idx | all col: Idx {
+        one cells.col.row & board.cages
+    }
 }
 
 pred isWellFormedCage[cage: Cage] {
