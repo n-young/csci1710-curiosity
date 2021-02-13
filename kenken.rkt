@@ -60,16 +60,20 @@ pred isWellFormedBoard[board: Board] {
     }
 }
 
-pred isWellFormedSolution[soln: Solution] {
+pred isSolution[soln: Solution] {
     -- Board is well formed.
     isWellFormedBoard[soln.board]
     -- Board cells equal to the solution cells
     soln.board.cages.cells = soln.values.Int
-    -- assert all cells have a value in [1, n]
-    all row: Idx | #(soln.values.row.Idx) = #(Idx)
-    all col: Idx | #(soln.values.Idx.col) = #(Idx)
-    all row: Idx | all col:Idx |
-        sol.values.row.col <= #(Idx) and sol.values.row.col > 0
+    -- assert all cells have a value in [1, n] with every valid value present in each row and column
+    all num: Int | num > 0 and num <= #(Idx) implies {
+        all row: Idx | one col: Idx {
+            soln.values.row.col = num
+        }
+        all col: Idx | one row: Idx {
+            soln.values.row.col = num
+        }
+    }
 }
 
 
@@ -77,9 +81,6 @@ pred isSolvedCage[cage: Cage, soln: Solution] {
     -- assert evaluateCage[Cage, Solution] == result
 }
 
-pred isSolvedSolution[soln: Solution] {
-    -- assert all cells are satisfied
-}
 -- ====================================================================
 -- TESTS (isWellFormedCage)
 -- ====================================================================
@@ -145,17 +146,12 @@ example DivisionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
 
 
 -- ====================================================================
--- TESTS (isWellFormedSolution)
+-- TESTS (isSolution)
 -- ====================================================================
 
 
 -- ====================================================================
 -- TESTS (isSolvedCage)
--- ====================================================================
-
-
--- ====================================================================
--- TESTS (isSolvedSolution)
 -- ====================================================================
 
 
