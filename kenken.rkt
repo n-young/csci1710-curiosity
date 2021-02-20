@@ -181,5 +181,5 @@ run {
         isWellFormedBoard[b]
         all c: Cage | c in b.cages
     }
-   -- Addition + Subtraction + Multiplication + Division in Cage.operation
-} for exactly 6 Int, exactly 0 Solution, exactly 1 Board, exactly 8 Cage
+    Addition + Subtraction + Multiplication + Division in Cage.operation
+} for exactly 6 Int, exactly 0 Solution, exactly 1 Board, exactly 7 Cage
