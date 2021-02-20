@@ -91,12 +91,28 @@ example StandardCage1 is {all cage: Cage | isWellFormedCage[cage]} for {
     cells = Cage0->(I10->I10 + I20->I10)
     result = Cage0->sing[7]
 }
--- Test on a 4-square cage.
+-- Test on a 3-cell cage.
 example StandardCage2 is {all cage: Cage | isWellFormedCage[cage]} for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
-    cells = Cage0->(I10->I10 + I20->I10 + I10->I20 + I10->I30)
+    cells = Cage0->(I10->I10 + I10->I20 + I10->I30)
+    result = Cage0->sing[7]
+}
+-- Test on a 1-cell cage.
+example StandardCage3 is {all cage: Cage | isWellFormedCage[cage]} for {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Addition0
+    cells = Cage0->I10->I10
+    result = Cage0->sing[7]
+}
+-- Test on a 1-cell cage.
+example Invalid1CellOp is {no cage: Cage | isWellFormedCage[cage]} for {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Division0
+    cells = Cage0->I10->I10
     result = Cage0->sing[7]
 }
 
