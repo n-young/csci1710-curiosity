@@ -191,7 +191,7 @@ example DivisionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
 -- ====================================================================
 
 -- 4x4 normal board
-example NormalBoard is { all board: Board | isWellFormedBoard[board] } for {
+example NormalBoard is { isWellFormedIdx all board: Board | isWellFormedBoard[board] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
     cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
@@ -211,11 +211,21 @@ example NormalBoard is { all board: Board | isWellFormedBoard[board] } for {
 
 
 -- ====================================================================
--- TESTS (isWellFormedSolution, isSolution)
+-- TESTS (isWellFormedSolution)
 -- ====================================================================
 
--- 4x4 normal solution
-inst NormalSolution {
+
+-- ====================================================================
+-- TESTS (isSolvedCage)
+-- ====================================================================
+
+
+-- ====================================================================
+-- TESTS (isSolvedBoard)
+-- ====================================================================
+
+-- solution with nondistinct cage values
+inst NondistinctCageSolution {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
     cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
@@ -239,6 +249,54 @@ inst NormalSolution {
         + I40->I10->sing[4] + I40->I20->sing[3] + I40->I30->sing[1] + I40->I40->sing[2])
 }
 
+-- solution
+inst Solution0 {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6)
+    operation = Cage0->Division0 + Cage1->Multiplication0 + Cage2->Multiplication0 + Cage3->Multiplication0
+        + Cage4->Multiplication0 + Cage5->Addition0 + Cage6->Multiplication0
+    cells = Cage0->(I10->I10 + I10->I20)
+        + Cage1->(I10->I30 + I10->I40)
+        + Cage2->(I20->I10 + I20->I20)
+        + Cage3->(I20->I30 + I20->I40 + I30->I30)
+        + Cage4->(I30->I10 + I30->I20 + I40->I10)
+        + Cage5->(I30->I40)
+        + Cage6->(I40->I20 + I40->I30 + I40->I40)
+    result = Cage0->sing[4] + Cage1->sing[6] + Cage2->sing[8] + Cage3->sing[6] + Cage4->sing[6]
+        + Cage5->sing[4] + Cage6->sing[12]
+    board = Solution0->Board0
+    values = Solution0->(
+          I10->I10->sing[1] + I10->I20->sing[4] + I10->I30->sing[3] + I10->I40->sing[2]
+        + I20->I10->sing[4] + I20->I20->sing[2] + I20->I30->sing[1] + I20->I40->sing[3]
+        + I30->I10->sing[3] + I30->I20->sing[1] + I30->I30->sing[2] + I30->I40->sing[4]
+        + I40->I10->sing[2] + I40->I20->sing[3] + I40->I30->sing[4] + I40->I40->sing[1])
+}
+
+-- solution
+inst Solution1 {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6)
+    operation = Cage0->Multiplication0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Addition0
+        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Addition0
+    cells = Cage0->(I10->I10 + I10->I20 + I10->I30)
+        + Cage1->(I10->I40)
+        + Cage2->(I20->I10 + I30->I10 + I40->I10)
+        + Cage3->(I20->I20 + I30->I20 + I40->I20)
+        + Cage4->(I20->I30 + I30->I30)
+        + Cage5->(I20->I40 + I30->I40 + I40->I40)
+        + Cage6->(I40->I30)
+    result = Cage0->sing[24] + Cage1->sing[1] + Cage2->sing[7] + Cage3->sing[8] + Cage4->sing[2]
+        + Cage5->sing[24] + Cage6->sing[2]
+    board = Solution0->Board0
+    values = Solution0->(
+          I10->I10->sing[3] + I10->I20->sing[2] + I10->I30->sing[4] + I10->I40->sing[1]
+        + I20->I10->sing[2] + I20->I20->sing[4] + I20->I30->sing[1] + I20->I40->sing[3]
+        + I30->I10->sing[4] + I30->I20->sing[1] + I30->I30->sing[3] + I30->I40->sing[2]
+        + I40->I10->sing[1] + I40->I20->sing[3] + I40->I30->sing[2] + I40->I40->sing[4])
+}
+
 
 -- ====================================================================
 -- RUN
@@ -247,4 +305,4 @@ inst NormalSolution {
 run {
     isWellFormedIdx
     all s: Solution | isSolvedBoard[s]
-} for exactly 7 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
+} for exactly 6 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage

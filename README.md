@@ -36,7 +36,7 @@ run {
 } for exactly 7 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
 ```
 
-The `isWellFormedIdx` predicate ensures that the `neighbors` relation is fixed properly. Otherwise, the rest of the predicate searches for a solved board. We found that running with higher than `7 Int` breaks Forge, and sometimes `7 Int` does too. We also recommend running with `exactly 1 Solution, exactly 1 Board`. The number of cages is tweakable, but we found the most interesting boards with `exactly 7 Cage`.
+The `isWellFormedIdx` predicate ensures that the `neighbors` relation is fixed properly. Otherwise, the rest of the predicate searches for a solved board. We found that running with anything other than `6 Int` breaks Forge or returns erroneous results. We also recommend running with `exactly 1 Solution, exactly 1 Board`. The number of cages is tweakable, but we found the most interesting boards with `exactly 7 Cage`.
 
 The program takes a little while to run, but when done, use the visualizer in `vis.js` with `<div>` mode to see a board and its solution!
 
