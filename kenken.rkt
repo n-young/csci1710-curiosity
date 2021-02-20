@@ -36,25 +36,6 @@ one sig Division extends Operation {}
 -- FUNCTIONS
 -- ====================================================================
 
-// TODO: Worry about duplicate values in a sol
-fun evaluateCageAddition[cage: Cage, soln: Solution]: Int {
-    sum[((cage.cells)->Int & soln.values)[Idx, Idx]]
-}
-fun evaluateCageSubtraction[cage: Cage, soln: Solution]: Int {
-    subtract[max[((cage.cells)->Int & soln.values)[Idx, Idx]], min[((cage.cells)->Int & soln.values)[Idx, Idx]]]
-}
-fun evaluateCageMultiplicationTwo[cage: Cage, soln: Solution]: Int {
-    multiply[max[((cage.cells)->Int & soln.values)[Idx, Idx]], min[((cage.cells)->Int & soln.values)[Idx, Idx]]]
-}
-fun evaluateCageMultiplicationThree[cage: Cage, soln: Solution]: Int {
-    // TODO: This one
-    // multiply[max[((cage.cells)->Int & soln.values)[Idx, Idx]],
-    //     multiply[min[((cage.cells)->Int & soln.values)[Idx, Idx]]], ]
-}
-pred checkCageDivision[cage: Cage, soln: Solution] {
-    multiply[min[((cage.cells)->Int & soln.values)[Idx, Idx]], cage.result] = min[((cage.cells)->Int & soln.values)[Idx, Idx]]]
-}
-
 
 -- ====================================================================
 -- PREDICATES
@@ -104,10 +85,19 @@ pred isSolved[soln: Solution] {
     isWellFormedSolution[soln]
     -- All cages evaluate properly
     all c: Cage | c in soln.board.cages implies {
-        c.operation in Addition implies sum[c.result] = evaluateCageAddition[c, soln]
-        else c.operation in Subtraction implies sum[c.result] = evaluateCageSubtraction[c, soln]
-        else c.operation in Multiplication implies sum[c.result] = evaluateCageMultiplicationTwo[c, soln]
-        else c.operation in Division implies checkCageDivision[c, soln]
+        let cageValues = ((cage.cells)->Int & soln.values)[Idx, Idx] | {
+            c.operation in Addition implies sum[c.result] = sum[cageValues]
+            else c.operation in Subtraction implies sum[c.result] = subtract[max[cageValues], min[cageValues]]
+            else c.operation in Multiplication implies {
+                #(cageValues) = 2 implies sum[c.result] = multiply[max[cageValues], min[cageValues]]
+                #(cageValues) = 3 implies {
+                    let maxValue = max[cageValues], withoutMax = cageValues - maxValue | {
+                        sum[c.result] = multiply[maxValue, max[withoutMax], min[withoutMax]]
+                    }
+                }
+            }
+            else c.operation in Division implies multiply[min[cageValues], cageResult] = min[cageValues]
+        }
     }
 }
 
