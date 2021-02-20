@@ -98,7 +98,7 @@ pred isSolved[soln: Solution] {
                     }
                 }
             }
-            else c.operation in Division implies multiply[min[cageValues], cageResult] = min[cageValues]
+            else c.operation in Division implies multiply[min[cageValues], c.result] = min[cageValues]
         }
     }
 }
