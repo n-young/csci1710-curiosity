@@ -40,8 +40,15 @@ one sig Division extends Operation {}
 fun evaluateCageAddition[cage: Cage, soln: Solution]: Int {
     add[((cage.cells)->Int & soln.values)[Idx, Idx]]
 }
-fun evaluateCageSubtraction[cage: Cage, soln: Solution]: Int {
-    subtract[((cage.cells)->Int & soln.values)[Idx, Idx]]
+pred checkCageSubtraction[cage: Cage, soln: Solution] {
+    some row, col: Idx | row->col in cage.cells and {
+        some otherRow, otherCol: Idx | {
+            otherRow->otherCol in cage.cells
+            row != otherRow
+            col != otherCol
+            subtract[solution.values.row.col, solution.values.otherRow.otherCol] = cage.result
+        }
+    }
 }
 fun evaluateCageMultiplication[cage: Cage, soln: Solution]: Int {
     multiply[((cage.cells)->Int & soln.values)[Idx, Idx]]
@@ -99,10 +106,12 @@ pred isSolved[soln: Solution] {
     isWellFormedSolution[soln]
     -- All cages evaluate properly
     all c: Cage | c in soln.board.cages implies {
+        checkCageSubtraction[c, soln]
+        /*
         c.operation in Addition implies sum[c.result] = evaluateCageAddition[c, soln]
         else c.operation in Subtraction implies sum[c.result] = evaluateCageSubtraction[c, soln]
         else c.operation in Multiplication implies sum[c.result] = evaluateCageMultiplication[c, soln]
-        else c.operation in Division implies sum[c.result] = evaluateCageDivision[c, soln]
+        else c.operation in Division implies sum[c.result] = evaluateCageDivision[c, soln]*/
     }
 }
 
