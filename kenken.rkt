@@ -38,23 +38,21 @@ one sig Division extends Operation {}
 
 // TODO: Worry about duplicate values in a sol
 fun evaluateCageAddition[cage: Cage, soln: Solution]: Int {
-    add[((cage.cells)->Int & soln.values)[Idx, Idx]]
+    sum[((cage.cells)->Int & soln.values)[Idx, Idx]]
 }
-pred checkCageSubtraction[cage: Cage, soln: Solution] {
-    some row, col: Idx | row->col in cage.cells and {
-        some otherRow, otherCol: Idx | {
-            otherRow->otherCol in cage.cells
-            row != otherRow
-            col != otherCol
-            subtract[solution.values.row.col, solution.values.otherRow.otherCol] = cage.result
-        }
-    }
+fun evaluateCageSubtraction[cage: Cage, soln: Solution]: Int {
+    subtract[max[((cage.cells)->Int & soln.values)[Idx, Idx]], min[((cage.cells)->Int & soln.values)[Idx, Idx]]]
 }
-fun evaluateCageMultiplication[cage: Cage, soln: Solution]: Int {
-    multiply[((cage.cells)->Int & soln.values)[Idx, Idx]]
+fun evaluateCageMultiplicationTwo[cage: Cage, soln: Solution]: Int {
+    multiply[max[((cage.cells)->Int & soln.values)[Idx, Idx]], min[((cage.cells)->Int & soln.values)[Idx, Idx]]]
 }
-fun evaluateCageDivision[cage: Cage, soln: Solution]: Int {
-    divide[((cage.cells)->Int & soln.values)[Idx, Idx]]
+fun evaluateCageMultiplicationThree[cage: Cage, soln: Solution]: Int {
+    // TODO: This one
+    // multiply[max[((cage.cells)->Int & soln.values)[Idx, Idx]],
+    //     multiply[min[((cage.cells)->Int & soln.values)[Idx, Idx]]], ]
+}
+pred checkCageDivision[cage: Cage, soln: Solution] {
+    multiply[min[((cage.cells)->Int & soln.values)[Idx, Idx]], cage.result] = min[((cage.cells)->Int & soln.values)[Idx, Idx]]]
 }
 
 
@@ -106,12 +104,10 @@ pred isSolved[soln: Solution] {
     isWellFormedSolution[soln]
     -- All cages evaluate properly
     all c: Cage | c in soln.board.cages implies {
-        checkCageSubtraction[c, soln]
-        /*
         c.operation in Addition implies sum[c.result] = evaluateCageAddition[c, soln]
         else c.operation in Subtraction implies sum[c.result] = evaluateCageSubtraction[c, soln]
-        else c.operation in Multiplication implies sum[c.result] = evaluateCageMultiplication[c, soln]
-        else c.operation in Division implies sum[c.result] = evaluateCageDivision[c, soln]*/
+        else c.operation in Multiplication implies sum[c.result] = evaluateCageMultiplicationTwo[c, soln]
+        else c.operation in Division implies checkCageDivision[c, soln]
     }
 }
 
