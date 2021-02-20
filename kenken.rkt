@@ -33,32 +33,29 @@ one sig Division extends Operation {}
 
 
 -- ====================================================================
--- FUNCTIONS
--- ====================================================================
-
-
--- ====================================================================
 -- PREDICATES
 -- ====================================================================
 
 pred isWellFormedCage[cage: Cage] {
-    -- There are at least some cells
+    -- There are at least some cells, but not more than 3.
     #(cage.cells) > 0
     #(cage.cells) <= 3
-    -- If a singleton, must be addition
+    -- If a singleton, must be addition.
     #(cage.cells) = 1 implies cage.operation in Addition
-    -- assert all cells are adjacent; if sub or div, max 2 cells
+    -- assert all cells are adjacent.
     #(cage.cells) > 1 implies {all row: Idx | all col: Idx | row->col in cage.cells implies {
         some cage.cells & (row->(col.neighbor) + row->(neighbor.col) + (row.neighbor)->col + (neighbor.row)->col)
     }}
-    -- If subtraction or division, must be size 2
+    -- If subtraction or division, must have 2 cells.
     cage.operation in Subtraction + Division implies #(cage.cells) = 2
 }
 
 pred isWellFormedBoard[board: Board] {
+    -- All cages are well formed.
     all cage: Cage | cage in board.cages implies {
         isWellFormedCage[cage]
     }
+    -- Each square is in a single cage.
     all row: Idx | all col: Idx {
         one (cells.row.col & board.cages)
     }
@@ -67,9 +64,9 @@ pred isWellFormedBoard[board: Board] {
 pred isWellFormedSolution[soln: Solution] {
     -- Board is well formed.
     isWellFormedBoard[soln.board]
-    -- Board cells equal to the solution cells
+    -- Board cells equal to the solution cells.
     soln.board.cages.cells = soln.values.Int
-    -- assert all cells have a value in [1, n] with every valid value present in each row and column
+    -- assert all cells have a value in [1, n] with every valid value present in each row and column.
     all num: Int | sum[num] > 0 and sum[num] <= #(Idx) implies {
         all row: Idx | one col: Idx {
             soln.values[row, col] = num
@@ -81,9 +78,9 @@ pred isWellFormedSolution[soln: Solution] {
 }
 
 pred isSolved[soln: Solution] {
-    -- Is a well formed solution
+    -- Is a well formed solution.
     isWellFormedSolution[soln]
-    -- All cages evaluate properly
+    -- All cages evaluate properly.
     all c: Cage | c in soln.board.cages implies {
         let cageValues = ((cage.cells)->Int & soln.values)[Idx, Idx] | {
             c.operation in Addition implies sum[c.result] = sum[cageValues]
@@ -107,31 +104,34 @@ pred isSolved[soln: Solution] {
 -- ====================================================================
 
 -- Test on a 1x2 cage.
-example StandardCage1 is {all cage: Cage | isWellFormedCage[cage]} for {
+example StandardCage1 is { all cage: Cage | isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
     cells = Cage0->(I10->I10 + I20->I10)
     result = Cage0->sing[7]
 }
+
 -- Test on a 3-cell cage.
-example StandardCage2 is {all cage: Cage | isWellFormedCage[cage]} for {
+example StandardCage2 is { all cage: Cage | isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
     cells = Cage0->(I10->I10 + I10->I20 + I10->I30)
     result = Cage0->sing[7]
 }
+
 -- Test on a 1-cell cage.
-example StandardCage3 is {all cage: Cage | isWellFormedCage[cage]} for {
+example StandardCage3 is { all cage: Cage | isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Addition0
     cells = Cage0->I10->I10
     result = Cage0->sing[7]
 }
+
 -- Test on a 1-cell cage.
-example Invalid1CellOp is {no cage: Cage | isWellFormedCage[cage]} for {
+example Invalid1CellOp is { no cage: Cage | isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Division0
@@ -140,7 +140,7 @@ example Invalid1CellOp is {no cage: Cage | isWellFormedCage[cage]} for {
 }
 
 -- Test on a disconnected cage (1,1) + (2, 2)
-example Disconnected is {some cage: Cage | not isWellFormedCage[cage]} for {
+example Disconnected is { some cage: Cage | not isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
@@ -149,7 +149,7 @@ example Disconnected is {some cage: Cage | not isWellFormedCage[cage]} for {
 }
 
 -- Test that subtraction can't be too big
-example SubtractionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
+example SubtractionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Subtraction0
@@ -158,7 +158,7 @@ example SubtractionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
 }
 
 -- Test that division can't be too big
-example DivisionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
+example DivisionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Division0
@@ -172,43 +172,53 @@ example DivisionBig is {some cage: Cage | not isWellFormedCage[cage]} for {
 -- ====================================================================
 
 -- 4x4 normal board
-example NormalBoard is {all board: Board | isWellFormedBoard[board]} for {
+example NormalBoard is { all board: Board | isWellFormedBoard[board] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
     cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
     operation = Cage0->Division0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Subtraction0
-    + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
-    cells = Cage0->(I10->I10 + I10->I20) + Cage1->(I10->I30 + I20->I30) + Cage2->I10->I40
-    + Cage3->(I20->I10 + I30->I10) + Cage4->(I20->I20 + I30->I20) + Cage5->(I30->I30 + I40->I30 + I40->I40)
-    + Cage6->(I20->I40 + I30->I40) + Cage7->(I40->I10 + I40->I20)
+        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
+    cells = Cage0->(I10->I10 + I10->I20)
+        + Cage1->(I10->I30 + I20->I30)
+        + Cage2->I10->I40
+        + Cage3->(I20->I10 + I30->I10)
+        + Cage4->(I20->I20 + I30->I20)
+        + Cage5->(I30->I30 + I40->I30 + I40->I40)
+        + Cage6->(I20->I40 + I30->I40)
+        + Cage7->(I40->I10 + I40->I20)
     result = Cage0->sing[2] + Cage1->sing[7] + Cage2->sing[4] + Cage3->sing[1] + Cage4->sing[3]
-    + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
+        + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
 }
 
 
 -- ====================================================================
--- TESTS (isWellFormedSolution)
+-- TESTS (isWellFormedSolution, isSolution)
 -- ====================================================================
 
-
--- ====================================================================
--- TESTS (isSolvedCage)
--- ====================================================================
-
-// example NormalSolution is {all board: Board | isWellFormedBoard[board]} for {
-//     neighbor = I10->I20 + I20->I30 + I30->I40
-//     Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
-//     cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
-//     operation = Cage0->Division0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Subtraction0
-//     + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
-//     cells = Cage0->(I10->I10 + I10->I20) + Cage1->(I10->I30 + I20->I30) + Cage2->I10->I40
-//     + Cage3->(I20->I10 + I30->I10) + Cage4->(I20->I20 + I30->I20) + Cage5->(I30->I30 + I40->I30 + I40->I40)
-//     + Cage6->(I20->I40 + I30->I40) + Cage7->(I40->I10 + I40->I20)
-//     result = Cage0->sing[2] + Cage1->sing[7] + Cage2->sing[4] + Cage3->sing[1] + Cage4->sing[3]
-//     + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
-//     board = Solution0->Board0
-//     values = Solution0->()
-// }
+-- 4x4 normal solution
+example NormalSolution is { all s: Solution | isWellFormedSolution[s] } for {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
+    operation = Cage0->Division0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Subtraction0
+        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
+    cells = Cage0->(I10->I10 + I10->I20)
+        + Cage1->(I10->I30 + I20->I30)
+        + Cage2->I10->I40
+        + Cage3->(I20->I10 + I30->I10)
+        + Cage4->(I20->I20 + I30->I20)
+        + Cage5->(I30->I30 + I40->I30 + I40->I40)
+        + Cage6->(I20->I40 + I30->I40)
+        + Cage7->(I40->I10 + I40->I20)
+    result = Cage0->sing[2] + Cage1->sing[7] + Cage2->sing[4] + Cage3->sing[1] + Cage4->sing[3]
+        + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
+    board = Solution0->Board0
+    values = Solution0->(
+        I10->I10->sing[1] + I10->I20->sing[2] + I10->I30->sing[3] + I10->I40->sing[4]
+        + I20->I10->sing[2] + I20->I20->sing[1] + I20->I30->sing[4] + I20->I40->sing[3]
+        + I30->I10->sing[3] + I30->I20->sing[4] + I30->I30->sing[2] + I30->I40->sing[1]
+        + I40->I10->sing[4] + I40->I20->sing[3] + I40->I30->sing[1] + I40->I40->sing[2])
+}
 
 
 -- ====================================================================
