@@ -25,7 +25,7 @@ Cage.atoms().forEach((cage, i) => {
   }
 })
 const table = document.createElement('table')
-const colors = ['#B10DC9', '#0074D9', '#2ECC40', '#85144b']
+const colors = ['#B10DC9', '#0074D9', '#2ECC40', '#85144b', '#39CCCC', '#FF851B', '#FF4136', '#AAAAAA']
 for (const row of cageArray) {
   const tr = document.createElement('tr')
   table.appendChild(tr)
@@ -45,5 +45,6 @@ table.style.border = '1px solid black'
 table.style.margin = '1em'
 div.innerHTML = ''
 div.appendChild(table)
+
 
 
