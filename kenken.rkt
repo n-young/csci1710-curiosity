@@ -91,8 +91,10 @@ pred isSolved[soln: Solution] {
             else c.operation in Multiplication implies {
                 #(cageValues) = 2 implies sum[c.result] = multiply[max[cageValues], min[cageValues]]
                 #(cageValues) = 3 implies {
-                    let maxValue = max[cageValues], withoutMax = cageValues - maxValue | {
-                        sum[c.result] = multiply[maxValue, max[withoutMax], min[withoutMax]]
+                    let maxValue = max[cageValues] | {
+                        let withoutMax = cageValues - maxValue | {
+                            sum[c.result] = multiply[maxValue, max[withoutMax], min[withoutMax]]
+                        }
                     }
                 }
             }
