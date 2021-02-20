@@ -28,6 +28,7 @@ Cage.atoms().forEach((cage, i) => {
     cageArray[rowIdx][colIdx] = {
       i,
       op: labels.get(unwrap(cage.join(operation))),
+      val: unwrap(cage.join(result))
     }
   }
 })
@@ -48,12 +49,12 @@ for (const row of cageArray) {
   for (const col of row) {
     const td = document.createElement('td')
     tr.appendChild(td)
-    td.textContent = col?.op
+    td.textContent = col?.op + col?.val
     td.style.backgroundColor = col != null ? colors[col.i] : 'transparent'
     td.style.textAlign = 'center'
     td.style.color = 'white'
-    td.style.width = '20px'
-    td.style.height = '20px'
+    td.style.width = '40px'
+    td.style.height = '40px'
     td.style.border = 'none'
   }
 }
@@ -85,8 +86,8 @@ for (const row of solutionValues) {
     tr.appendChild(td)
     td.textContent = col
     td.style.textAlign = 'center'
-    td.style.width = '22px'
-    td.style.height = '2px'
+    td.style.width = '40px'
+    td.style.height = '40px'
     td.style.border = '1px solid black'
   }
 }

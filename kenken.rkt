@@ -10,6 +10,18 @@ abstract sig Idx {
 one sig I1, I2, I3, I4 extends Idx {}
 pred isWellFormedIdx { neighbor = I1->I2 + I2->I3 + I3->I4 }
 
+abstract sig Operation {}
+one sig Addition extends Operation {}
+one sig Subtraction extends Operation {}
+one sig Multiplication extends Operation {}
+one sig Division extends Operation {}
+
+sig Cage {
+    operation: one Operation,
+    cells: set Idx->Idx,
+    result: one Int
+}
+
 sig Board {
     cages: set Cage
 }
@@ -18,18 +30,6 @@ sig Solution {
     board: one Board,
     values: set Idx->Idx->Int
 }
-
-sig Cage {
-    operation: one Operation,
-    cells: set Idx->Idx,
-    result: one Int
-}
-
-abstract sig Operation {}
-one sig Addition extends Operation {}
-one sig Subtraction extends Operation {}
-one sig Multiplication extends Operation {}
-one sig Division extends Operation {}
 
 
 -- ====================================================================
@@ -75,29 +75,37 @@ pred isWellFormedSolution[soln: Solution] {
             soln.values[row, col] = num
         }
     }
+    -- Assert that each cage has distinct values
+    -- NOTE: Remove this later
+    all c: Cage | c in soln.board.cages implies {
+        #c.cells = #((c.cells)->Int & soln.values)[Idx, Idx]
+    }
 }
 
-pred isSolved[soln: Solution] {
-    -- Is a well formed solution.
-    isWellFormedSolution[soln]
-    -- All cages evaluate properly.
-    all c: Cage | c in soln.board.cages implies {
-        let cageValues = ((c.cells)->Int & soln.values)[Idx, Idx] | {
-            c.operation in Addition implies sum[c.result] = sum[cageValues]
-            else c.operation in Subtraction implies sum[c.result] = subtract[max[cageValues], min[cageValues]]
-            else c.operation in Multiplication implies {
-                #(cageValues) = 2 implies sum[c.result] = multiply[max[cageValues], min[cageValues]]
-                #(cageValues) = 3 implies {
-                    let maxValue = max[cageValues] | {
-                        let withoutMax = cageValues - maxValue | {
-                            sum[c.result] = multiply[maxValue, max[withoutMax], min[withoutMax]]
-                        }
+pred isSolvedCage[c: Cage, soln: Solution] {
+    -- Depending on the operation, evaluates correctly.
+    let cageValues = ((c.cells)->Int & soln.values)[Idx, Idx] | {
+        c.operation in Addition implies sum[c.result] = sum[cageValues]
+        else c.operation in Subtraction implies sum[c.result] = subtract[max[cageValues], min[cageValues]]
+        else c.operation in Multiplication implies {
+            #(cageValues) = 2 implies sum[c.result] = multiply[max[cageValues], min[cageValues]]
+            #(cageValues) = 3 implies {
+                let maxValue = max[cageValues] | {
+                    let withoutMax = cageValues - sing[maxValue] | {
+                        sum[c.result] = multiply[maxValue, max[withoutMax], min[withoutMax]]
                     }
                 }
             }
-            else c.operation in Division implies multiply[min[cageValues], c.result] = min[cageValues]
         }
+        else c.operation in Division implies multiply[min[cageValues], sum[c.result]] = max[cageValues]
     }
+}
+
+pred isSolvedBoard[soln: Solution] {
+    -- Is a well formed solution.
+    isWellFormedSolution[soln]
+    -- All cages evaluate properly.
+    all c: Cage | c in soln.board.cages implies isSolvedCage[c, soln]
 }
 
 
@@ -105,13 +113,22 @@ pred isSolved[soln: Solution] {
 -- TESTS (isWellFormedCage)
 -- ====================================================================
 
+-- Test on a 1-cell cage.
+example StandardCage3 is { all cage: Cage | isWellFormedCage[cage] } for {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Addition0
+    cells = Cage0->I10->I10
+    result = Cage0->sing[3]
+}
+
 -- Test on a 1x2 cage.
 example StandardCage1 is { all cage: Cage | isWellFormedCage[cage] } for {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0
     operation = Cage0->Multiplication0
     cells = Cage0->(I10->I10 + I20->I10)
-    result = Cage0->sing[7]
+    result = Cage0->sing[3]
 }
 
 -- Test on a 3-cell cage.
@@ -120,16 +137,7 @@ example StandardCage2 is { all cage: Cage | isWellFormedCage[cage] } for {
     Cage = Cage0
     operation = Cage0->Multiplication0
     cells = Cage0->(I10->I10 + I10->I20 + I10->I30)
-    result = Cage0->sing[7]
-}
-
--- Test on a 1-cell cage.
-example StandardCage3 is { all cage: Cage | isWellFormedCage[cage] } for {
-    neighbor = I10->I20 + I20->I30 + I30->I40
-    Cage = Cage0
-    operation = Cage0->Addition0
-    cells = Cage0->I10->I10
-    result = Cage0->sing[7]
+    result = Cage0->sing[3]
 }
 
 -- Test on a 1-cell cage.
@@ -138,7 +146,16 @@ example Invalid1CellOp is { no cage: Cage | isWellFormedCage[cage] } for {
     Cage = Cage0
     operation = Cage0->Division0
     cells = Cage0->I10->I10
-    result = Cage0->sing[7]
+    result = Cage0->sing[3]
+}
+
+-- Test on a 4-cell cage (too big).
+example CageTooBig is { no cage: Cage | isWellFormedCage[cage] } for {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Multiplication0
+    cells = Cage0->(I10->I10 + I10->I20 + I10->I30 + I10->I40)
+    result = Cage0->sing[3]
 }
 
 -- Test on a disconnected cage (1,1) + (2, 2)
@@ -147,7 +164,16 @@ example Disconnected is { some cage: Cage | not isWellFormedCage[cage] } for {
     Cage = Cage0
     operation = Cage0->Multiplication0
     cells = Cage0->(I10->I10 + I20->I20)
-    result = Cage0->sing[7]
+    result = Cage0->sing[3]
+}
+
+-- Test that a singleton must be addition
+example DivisionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0
+    operation = Cage0->Division0
+    cells = Cage0->(I10->I10)
+    result = Cage0->sing[3]
 }
 
 -- Test that subtraction can't be too big
@@ -156,7 +182,7 @@ example SubtractionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
     Cage = Cage0
     operation = Cage0->Subtraction0
     cells = Cage0->(I10->I10 + I20->I10 + I10->I20)
-    result = Cage0->sing[7]
+    result = Cage0->sing[3]
 }
 
 -- Test that division can't be too big
@@ -165,7 +191,7 @@ example DivisionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
     Cage = Cage0
     operation = Cage0->Division0
     cells = Cage0->(I10->I10 + I20->I10 + I10->I20)
-    result = Cage0->sing[7]
+    result = Cage0->sing[3]
 }
 
 
@@ -198,7 +224,7 @@ example NormalBoard is { all board: Board | isWellFormedBoard[board] } for {
 -- ====================================================================
 
 -- 4x4 normal solution
-example NormalSolution is { all s: Solution | isWellFormedSolution[s] } for {
+inst NormalSolution {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
     cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
@@ -229,5 +255,5 @@ example NormalSolution is { all s: Solution | isWellFormedSolution[s] } for {
 
 run {
     isWellFormedIdx
-    all s: Solution | isWellFormedSolution[s]
+    all s: Solution | isSolvedBoard[s]
 } for exactly 6 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
