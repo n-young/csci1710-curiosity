@@ -40,25 +40,21 @@ pred isWellFormedCage[cage: Cage] {
     -- There are at least some cells, but not more than 3.
     #(cage.cells) > 0
     #(cage.cells) <= 3
-    -- If a singleton, must be addition.
-    #(cage.cells) = 1 implies cage.operation in Addition
-    -- assert all cells are adjacent.
+    -- All cells are connected.
     #(cage.cells) > 1 implies {all row: Idx | all col: Idx | row->col in cage.cells implies {
         some cage.cells & (row->(col.neighbor) + row->(neighbor.col) + (row.neighbor)->col + (neighbor.row)->col)
     }}
-    -- If subtraction or division, must have 2 cells.
-    cage.operation in Subtraction + Division implies #(cage.cells) = 2
+    -- If a singleton, must be addition.
+    #(cage.cells) = 1 implies cage.operation in Addition
+    -- If subtraction or division, must have exactly 2 cells.
+    cage.operation in (Subtraction + Division) implies #(cage.cells) = 2
 }
 
 pred isWellFormedBoard[board: Board] {
     -- All cages are well formed.
-    all cage: Cage | cage in board.cages implies {
-        isWellFormedCage[cage]
-    }
+    all cage: Cage | cage in board.cages implies isWellFormedCage[cage]
     -- Each square is in a single cage.
-    all row: Idx | all col: Idx {
-        one (cells.row.col & board.cages)
-    }
+    all row: Idx | all col: Idx | one (cells.row.col & board.cages)
 }
 
 pred isWellFormedSolution[soln: Solution] {
@@ -66,17 +62,12 @@ pred isWellFormedSolution[soln: Solution] {
     isWellFormedBoard[soln.board]
     -- Board cells equal to the solution cells.
     soln.board.cages.cells = soln.values.Int
-    -- assert all cells have a value in [1, n] with every valid value present in each row and column.
+    -- All cells have a value in [1, n] with every value present in each row and column.
     all num: Int | sum[num] > 0 and sum[num] <= #(Idx) implies {
-        all row: Idx | one col: Idx {
-            soln.values[row, col] = num
-        }
-        all col: Idx | one row: Idx {
-            soln.values[row, col] = num
-        }
+        all row: Idx | one col: Idx | soln.values[row, col] = num
+        all col: Idx | one row: Idx | soln.values[row, col] = num
     }
-    -- Assert that each cage has distinct values
-    -- NOTE: Remove this later
+    -- Each cage has distinct values.
     all c: Cage | c in soln.board.cages implies {
         #c.cells = #((c.cells)->Int & soln.values)[Idx, Idx]
     }
@@ -256,4 +247,4 @@ inst NormalSolution {
 run {
     isWellFormedIdx
     all s: Solution | isSolvedBoard[s]
-} for exactly 6 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
+} for exactly 7 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
