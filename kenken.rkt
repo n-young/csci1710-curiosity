@@ -85,7 +85,7 @@ pred isSolved[soln: Solution] {
     isWellFormedSolution[soln]
     -- All cages evaluate properly
     all c: Cage | c in soln.board.cages implies {
-        let cageValues = ((cage.cells)->Int & soln.values)[Idx, Idx] | {
+        let cageValues = ((c.cells)->Int & soln.values)[Idx, Idx] | {
             c.operation in Addition implies sum[c.result] = sum[cageValues]
             else c.operation in Subtraction implies sum[c.result] = subtract[max[cageValues], min[cageValues]]
             else c.operation in Multiplication implies {
