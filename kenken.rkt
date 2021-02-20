@@ -37,7 +37,8 @@ one sig Division extends Operation {}
 
 pred isWellFormedCage[cage: Cage] {
     -- There are at least some cells
-    some cage.cells
+    #(cage.cells) > 0
+    #(cage.cells) <= 3
     -- If a singleton, must be addition
     #(cage.cells) = 1 implies cage.operation in Addition
     -- assert all cells are adjacent; if sub or div, max 2 cells
@@ -53,7 +54,7 @@ pred isWellFormedBoard[board: Board] {
         isWellFormedCage[cage]
     }
     all row: Idx | all col: Idx {
-        one cells.col.row & board.cages
+        one (cells.row.col & board.cages)
     }
 }
 
@@ -160,9 +161,9 @@ example NormalBoard is {all board: Board | isWellFormedBoard[board]} for {
 
 run {
     isWellFormedIdx
-    all b: Board {
+    some b: Board | {
         isWellFormedBoard[b]
         all c: Cage | c in b.cages
     }
-    Addition + Subtraction + Multiplication + Division in Cage.operation
-} for exactly 1 Board, 0 Solution, 6 Int
+   -- Addition + Subtraction + Multiplication + Division in Cage.operation
+} for exactly 6 Int, exactly 0 Solution, exactly 1 Board, exactly 8 Cage
