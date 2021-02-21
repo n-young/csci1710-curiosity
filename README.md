@@ -1,5 +1,5 @@
 # Curiosity Modelling - KenKen
-Jed Fox and Nick Young
+Jed Fox (`jfox10`) and Nick Young (`nyoung10`)
 
 ## What is KenKen?
 
@@ -9,16 +9,16 @@ We are modelling [KenKen](https://en.wikipedia.org/wiki/KenKen) (sometimes calle
 - Every row has distinct values between 1 and `n`, inclusive,
 - The values in every cage either sum, subtract, multiply, or divide to a target value.
 
-The first two rules are simple, the third requires explanation. A KenKen board is split into cages, which surround some number of squares and have an operation and a target value. A filled cage should have its values reach the target value using the specified operation. Usually, subtraction and division cages are limited to having exactly two cells, and any cage with one cell just has a fixed value and no operation. Not all variants of KenKen work this way, but ours does.
+The first two rules are simple, the third requires explanation. A KenKen board is split into cages, which surround some number of squares and have an operation and a target value. A filled cage should have its values reach the target value using the specified operation. Usually, subtraction and division cages are limited to having exactly two cells (where the larger value is divided by the smaller value, or the smaller value is subtracted from the larger value), and any cage with one cell just has a fixed value and no operation. Not all variants of KenKen work this way, but ours does.
 
 
 ## Design Choices
 
 Aside from the given constraints of standard KenKen, we added our own constraints to make the problem simpler to approach. We:
 
-- Fixed the board size to 4, since 3 wasn't particularly interesting, and 5 had trouble running in reasonable time,
-- Set the maximum cage size to 3, since ensuring that cages didn't split into islands was prohibitively difficult,
-- Asserted that cages have distinct values, since sets disallow multiplicity, doing math over sets wasn't clean.
+- Fixed the board size to 4×4, since 3×3 wasn't particularly interesting, and 5×5 had trouble running in reasonable time;
+- Set the maximum cage size to 3 cells, since ensuring that cages didn't split into islands was prohibitively difficult;
+- Asserted that cages have distinct values, because this will always be true for 1- or 2-cell cages, and it is difficult to store duplicate values in a Forge set in the 3-cell cage case.
 
 With enough time, we could probably remove these overconstraints, but adding them made the problem much more doable.
 
