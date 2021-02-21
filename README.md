@@ -33,7 +33,7 @@ When running KenKen, we recommend running something like:
 run {
     isWellFormedIdx
     all s: Solution | isSolvedBoard[s]
-} for exactly 7 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
+} for exactly 6 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
 ```
 
 The `isWellFormedIdx` predicate ensures that the `neighbors` relation is fixed properly. Otherwise, the rest of the predicate searches for a solved board. We found that running with anything other than `6 Int` breaks Forge or returns erroneous results. We also recommend running with `exactly 1 Solution, exactly 1 Board`. The number of cages is tweakable, but we found the most interesting boards with `exactly 7 Cage`.
