@@ -101,6 +101,16 @@ pred isSolvedBoard[soln: Solution] {
 
 
 -- ====================================================================
+-- RUN
+-- ====================================================================
+
+run {
+    isWellFormedIdx
+    all s: Solution | isSolvedBoard[s]
+} for exactly 6 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
+
+
+-- ====================================================================
 -- TESTS (isWellFormedCage)
 -- ====================================================================
 
@@ -415,7 +425,142 @@ test expect {
     sol1_solved: { isWellFormedIdx all s: Solution | isSolvedBoard[s] } for exactly 6 Int for Solution1 is sat
 }
 
--- solution with nondistinct cage values
+-- board has overlapping cages (Cage0 and Cage1)
+inst OverlappingCages {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6)
+    operation = Cage0->Division0 + Cage1->Multiplication0 + Cage2->Multiplication0 + Cage3->Multiplication0
+        + Cage4->Multiplication0 + Cage5->Addition0 + Cage6->Multiplication0
+    cells = Cage0->(I10->I10 + I10->I20)
+        + Cage1->(I10->I20 + I10->I30 + I10->I40)
+        + Cage2->(I20->I10 + I20->I20)
+        + Cage3->(I20->I30 + I20->I40 + I30->I30)
+        + Cage4->(I30->I10 + I30->I20 + I40->I10)
+        + Cage5->(I30->I40)
+        + Cage6->(I40->I20 + I40->I30 + I40->I40)
+    result = Cage0->sing[4] + Cage1->sing[6] + Cage2->sing[8] + Cage3->sing[6] + Cage4->sing[6]
+        + Cage5->sing[4] + Cage6->sing[12]
+    board = Solution0->Board0
+    values = Solution0->(
+          I10->I10->sing[1] + I10->I20->sing[4] + I10->I30->sing[3] + I10->I40->sing[2]
+        + I20->I10->sing[4] + I20->I20->sing[2] + I20->I30->sing[1] + I20->I40->sing[3]
+        + I30->I10->sing[3] + I30->I20->sing[1] + I30->I30->sing[2] + I30->I40->sing[4]
+        + I40->I10->sing[2] + I40->I20->sing[3] + I40->I30->sing[4] + I40->I40->sing[1])
+}
+test expect {
+    overlapping_cages: { isWellFormedIdx no b: Board | isWellFormedBoard[b] } for exactly 6 Int for OverlappingCages is sat
+}
+
+-- missing cell (I10->I20)
+inst MissingCell {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6)
+    operation = Cage0->Division0 + Cage1->Multiplication0 + Cage2->Multiplication0 + Cage3->Multiplication0
+        + Cage4->Multiplication0 + Cage5->Addition0 + Cage6->Multiplication0
+    cells = Cage0->(I10->I10)
+        + Cage1->(I10->I30 + I10->I40)
+        + Cage2->(I20->I10 + I20->I20)
+        + Cage3->(I20->I30 + I20->I40 + I30->I30)
+        + Cage4->(I30->I10 + I30->I20 + I40->I10)
+        + Cage5->(I30->I40)
+        + Cage6->(I40->I20 + I40->I30 + I40->I40)
+    result = Cage0->sing[4] + Cage1->sing[6] + Cage2->sing[8] + Cage3->sing[6] + Cage4->sing[6]
+        + Cage5->sing[4] + Cage6->sing[12]
+    board = Solution0->Board0
+    values = Solution0->(
+          I10->I10->sing[1] + I10->I20->sing[4] + I10->I30->sing[3] + I10->I40->sing[2]
+        + I20->I10->sing[4] + I20->I20->sing[2] + I20->I30->sing[1] + I20->I40->sing[3]
+        + I30->I10->sing[3] + I30->I20->sing[1] + I30->I30->sing[2] + I30->I40->sing[4]
+        + I40->I10->sing[2] + I40->I20->sing[3] + I40->I30->sing[4] + I40->I40->sing[1])
+}
+test expect {
+    missing_cell: { isWellFormedIdx no b: Board | isWellFormedBoard[b] } for exactly 6 Int for MissingCell is sat
+}
+
+-- malformed cage (Cage1 can't be multiplication)
+inst MalformedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6)
+    operation = Cage0->Division0 + Cage1->Multiplication0 + Cage2->Multiplication0 + Cage3->Multiplication0
+        + Cage4->Multiplication0 + Cage5->Addition0 + Cage6->Multiplication0
+    cells = Cage0->(I10->I10 + I10->I20 + I10->I30)
+        + Cage1->(I10->I40)
+        + Cage2->(I20->I10 + I20->I20)
+        + Cage3->(I20->I30 + I20->I40 + I30->I30)
+        + Cage4->(I30->I10 + I30->I20 + I40->I10)
+        + Cage5->(I30->I40)
+        + Cage6->(I40->I20 + I40->I30 + I40->I40)
+    result = Cage0->sing[4] + Cage1->sing[6] + Cage2->sing[8] + Cage3->sing[6] + Cage4->sing[6]
+        + Cage5->sing[4] + Cage6->sing[12]
+    board = Solution0->Board0
+    values = Solution0->(
+          I10->I10->sing[1] + I10->I20->sing[4] + I10->I30->sing[3] + I10->I40->sing[2]
+        + I20->I10->sing[4] + I20->I20->sing[2] + I20->I30->sing[1] + I20->I40->sing[3]
+        + I30->I10->sing[3] + I30->I20->sing[1] + I30->I30->sing[2] + I30->I40->sing[4]
+        + I40->I10->sing[2] + I40->I20->sing[3] + I40->I30->sing[4] + I40->I40->sing[1])
+}
+test expect {
+    malformed_cage: { isWellFormedIdx no b: Board | isWellFormedBoard[b] } for exactly 6 Int for MalformedCage is sat
+}
+
+-- missing solution cells
+inst MissingSolutionCells {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6)
+    operation = Cage0->Multiplication0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Addition0
+        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Addition0
+    cells = Cage0->(I10->I10 + I10->I20 + I10->I30)
+        + Cage1->(I10->I40)
+        + Cage2->(I20->I10 + I30->I10 + I40->I10)
+        + Cage3->(I20->I20 + I30->I20 + I40->I20)
+        + Cage4->(I20->I30 + I30->I30)
+        + Cage5->(I20->I40 + I30->I40 + I40->I40)
+        + Cage6->(I40->I30)
+    result = Cage0->sing[24] + Cage1->sing[1] + Cage2->sing[7] + Cage3->sing[8] + Cage4->sing[2]
+        + Cage5->sing[24] + Cage6->sing[2]
+    board = Solution0->Board0
+    values = Solution0->(
+          I10->I10->sing[3] + I10->I20->sing[2] + I10->I30->sing[4] + I10->I40->sing[1]
+        + I20->I10->sing[2] + I20->I20->sing[4] + I20->I30->sing[1] + I20->I40->sing[3]
+        + I30->I10->sing[4] + I30->I20->sing[1] + I30->I30->sing[3] + I30->I40->sing[2]
+        + I40->I10->sing[1] + I40->I20->sing[3] + I40->I30->sing[2])
+}
+test expect {
+    missing_solution_cells: { isWellFormedIdx no s: Solution | isWellFormedSolution[s] } for exactly 6 Int for MissingSolutionCells is sat
+}
+
+-- valid solution with nondistinct rows/cols (col 1 and 2)
+inst NondistinctRowsCols {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6)
+    operation = Cage0->Multiplication0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Addition0
+        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Addition0
+    cells = Cage0->(I10->I10 + I10->I20 + I10->I30)
+        + Cage1->(I10->I40)
+        + Cage2->(I20->I10 + I30->I10 + I40->I10)
+        + Cage3->(I20->I20 + I30->I20 + I40->I20)
+        + Cage4->(I20->I30 + I30->I30)
+        + Cage5->(I20->I40 + I30->I40 + I40->I40)
+        + Cage6->(I40->I30)
+    result = Cage0->sing[24] + Cage1->sing[1] + Cage2->sing[7] + Cage3->sing[8] + Cage4->sing[2]
+        + Cage5->sing[24] + Cage6->sing[2]
+    board = Solution0->Board0
+    values = Solution0->(
+          I10->I10->sing[3] + I10->I20->sing[2] + I10->I30->sing[4] + I10->I40->sing[1]
+        + I20->I10->sing[4] + I20->I20->sing[2] + I20->I30->sing[1] + I20->I40->sing[3]
+        + I30->I10->sing[4] + I30->I20->sing[1] + I30->I30->sing[3] + I30->I40->sing[2]
+        + I40->I10->sing[1] + I40->I20->sing[3] + I40->I30->sing[2] + I40->I40->sing[4])
+}
+test expect {
+    nondistinct_rows_cols: { isWellFormedIdx no s: Solution | isWellFormedSolution[s] } for exactly 6 Int for NondistinctRowsCols is sat
+}
+
+-- valid solution with nondistinct cage values
 inst NondistinctCageSolution {
     neighbor = I10->I20 + I20->I30 + I30->I40
     Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
@@ -439,18 +584,7 @@ inst NondistinctCageSolution {
         + I30->I10->sing[3] + I30->I20->sing[4] + I30->I30->sing[2] + I30->I40->sing[1]
         + I40->I10->sing[4] + I40->I20->sing[3] + I40->I30->sing[1] + I40->I40->sing[2])
 }
-// test expect {
-//     nondistinct_wfb: { isWellFormedIdx no b: Board | isWellFormedBoard[b] } for exactly 6 Int for NondistinctCageSolution is sat
-//     nondistinct_wfs: { isWellFormedIdx no s: Solution | isWellFormedSolution[s] } for exactly 6 Int for NondistinctCageSolution is sat
-//     nondistinct_solved: { isWellFormedIdx no s: Solution | isSolvedBoard[s] } for exactly 6 Int for NondistinctCageSolution is sat
-// }
-
-
--- ====================================================================
--- RUN
--- ====================================================================
-
-run {
-    isWellFormedIdx
-    all s: Solution | isSolvedBoard[s]
-} for exactly 6 Int, exactly 1 Solution, exactly 1 Board, exactly 7 Cage
+test expect {
+    nondistinct_wfb: { isWellFormedIdx all b: Board | isWellFormedBoard[b] } for exactly 6 Int for NondistinctCageSolution is sat
+    nondistinct_wfs: { isWellFormedIdx no s: Solution | isWellFormedSolution[s] } for exactly 6 Int for NondistinctCageSolution is sat
+}
