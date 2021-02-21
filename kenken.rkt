@@ -190,35 +190,172 @@ example DivisionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
 -- TESTS (isSolvedCage)
 -- ====================================================================
 
+-- Solved singleton case
+inst SingletonSolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Addition0
+    cells = C0->(I10->I10)
+    result = C0->sing[3]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[3])
+}
+test expect {
+    singleton_solved_cage: { all c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for SingletonSolvedCage is sat
+}
+
+-- Solved 2-addition cage
+inst Addition2SolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Addition0
+    cells = C0->(I10->I10 + I10->I20)
+    result = C0->sing[5]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[3] + I10->I20->sing[2])
+}
+test expect {
+    addition_2_solved_cage: { all c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for Addition2SolvedCage is sat
+}
+
+-- Solved 3-addition cage
+inst Addition3SolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Addition0
+    cells = C0->(I10->I10 + I10->I20 + I10->I30)
+    result = C0->sing[6]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[3] + I10->I20->sing[2] + I10->I30->sing[1])
+}
+test expect {
+    addition_3_solved_cage: { all c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for Addition3SolvedCage is sat
+}
+
+-- Solved 2-subtraction cage
+inst Subtraction2SolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Subtraction0
+    cells = C0->(I10->I10 + I10->I20)
+    result = C0->sing[1]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[3] + I10->I20->sing[2])
+}
+test expect {
+    subtraction_2_solved_cage: { all c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for Subtraction2SolvedCage is sat
+}
+
+-- Solved 2-multiplication cage
+inst Multiplication2SolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Multiplication0
+    cells = C0->(I10->I10 + I10->I20)
+    result = C0->sing[6]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[3] + I10->I20->sing[2])
+}
+test expect {
+    multiplication_2_solved_cage: { all c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for Multiplication2SolvedCage is sat
+}
+
+-- Solved 3-multiplication cage
+inst Multiplication3SolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Multiplication0
+    cells = C0->(I10->I10 + I10->I20 + I10->I30)
+    result = C0->sing[12]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[3] + I10->I20->sing[4] + I10->I30->sing[1])
+}
+test expect {
+    multiplication_3_solved_cage: { all c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for Multiplication3SolvedCage is sat
+}
+
+-- Solved 2-division cage
+inst Division2SolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Division0
+    cells = C0->(I10->I10 + I10->I20)
+    result = C0->sing[3]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[6] + I10->I20->sing[2])
+}
+test expect {
+    division_2_solved_cage: { all c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for Division2SolvedCage is sat
+}
+
+-- Division isn't integer division
+inst NotIntegerDivisionCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Division0
+    cells = C0->(I10->I10 + I10->I20)
+    result = C0->sing[2]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[5] + I10->I20->sing[2])
+}
+test expect {
+    not_integer_division: { no c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for NotIntegerDivisionCage is sat
+}
+
+-- Can't handle duplicate values
+inst DupeValsSolvedCage {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = C0
+    operation = C0->Multiplication0
+    cells = C0->(I10->I10 + I10->I20 + I10->I30)
+    result = C0->sing[12]
+    Board = B
+    cages = B->C0
+    Solution = S
+    board = S->B
+    values = S->(I10->I10->sing[3] + I10->I20->sing[2] + I10->I30->sing[2])
+}
+test expect {
+    dupe_vals_solved_cage: { no c: Cage | all s: Solution | isWellFormedCage[c] and isSolvedCage[c, s] }
+        for exactly 6 Int for DupeValsSolvedCage is sat
+}
+
 
 -- ====================================================================
 -- TESTS (isWellFormedBoard, isWellFormedSolution, isSolvedBoard)
 -- ====================================================================
-
--- solution with nondistinct cage values
-inst NondistinctCageSolution {
-    neighbor = I10->I20 + I20->I30 + I30->I40
-    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
-    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
-    operation = Cage0->Division0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Subtraction0
-        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
-    cells = Cage0->(I10->I10 + I10->I20)
-        + Cage1->(I10->I30 + I20->I30)
-        + Cage2->I10->I40
-        + Cage3->(I20->I10 + I30->I10)
-        + Cage4->(I20->I20 + I30->I20)
-        + Cage5->(I30->I30 + I40->I30 + I40->I40)
-        + Cage6->(I20->I40 + I30->I40)
-        + Cage7->(I40->I10 + I40->I20)
-    result = Cage0->sing[2] + Cage1->sing[7] + Cage2->sing[4] + Cage3->sing[1] + Cage4->sing[3]
-        + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
-    board = Solution0->Board0
-    values = Solution0->(
-        I10->I10->sing[1] + I10->I20->sing[2] + I10->I30->sing[3] + I10->I40->sing[4]
-        + I20->I10->sing[2] + I20->I20->sing[1] + I20->I30->sing[4] + I20->I40->sing[3]
-        + I30->I10->sing[3] + I30->I20->sing[4] + I30->I30->sing[2] + I30->I40->sing[1]
-        + I40->I10->sing[4] + I40->I20->sing[3] + I40->I30->sing[1] + I40->I40->sing[2])
-}
 
 -- solution
 inst Solution0 {
@@ -242,6 +379,11 @@ inst Solution0 {
         + I20->I10->sing[4] + I20->I20->sing[2] + I20->I30->sing[1] + I20->I40->sing[3]
         + I30->I10->sing[3] + I30->I20->sing[1] + I30->I30->sing[2] + I30->I40->sing[4]
         + I40->I10->sing[2] + I40->I20->sing[3] + I40->I30->sing[4] + I40->I40->sing[1])
+}
+test expect {
+    sol0_wfb: { isWellFormedIdx all b: Board | isWellFormedBoard[b] } for exactly 6 Int for Solution0 is sat
+    sol0_wfs: { isWellFormedIdx all s: Solution | isWellFormedSolution[s] } for exactly 6 Int for Solution0 is sat
+    sol0_solved: { isWellFormedIdx all s: Solution | isSolvedBoard[s] } for exactly 6 Int for Solution0 is sat
 }
 
 -- solution
@@ -267,6 +409,41 @@ inst Solution1 {
         + I30->I10->sing[4] + I30->I20->sing[1] + I30->I30->sing[3] + I30->I40->sing[2]
         + I40->I10->sing[1] + I40->I20->sing[3] + I40->I30->sing[2] + I40->I40->sing[4])
 }
+test expect {
+    sol1_wfb: { isWellFormedIdx all b: Board | isWellFormedBoard[b] } for exactly 6 Int for Solution1 is sat
+    sol1_wfs: { isWellFormedIdx all s: Solution | isWellFormedSolution[s] } for exactly 6 Int for Solution1 is sat
+    sol1_solved: { isWellFormedIdx all s: Solution | isSolvedBoard[s] } for exactly 6 Int for Solution1 is sat
+}
+
+-- solution with nondistinct cage values
+inst NondistinctCageSolution {
+    neighbor = I10->I20 + I20->I30 + I30->I40
+    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
+    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
+    operation = Cage0->Division0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Subtraction0
+        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
+    cells = Cage0->(I10->I10 + I10->I20)
+        + Cage1->(I10->I30 + I20->I30)
+        + Cage2->I10->I40
+        + Cage3->(I20->I10 + I30->I10)
+        + Cage4->(I20->I20 + I30->I20)
+        + Cage5->(I30->I30 + I40->I30 + I40->I40)
+        + Cage6->(I20->I40 + I30->I40)
+        + Cage7->(I40->I10 + I40->I20)
+    result = Cage0->sing[2] + Cage1->sing[7] + Cage2->sing[4] + Cage3->sing[1] + Cage4->sing[3]
+        + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
+    board = Solution0->Board0
+    values = Solution0->(
+        I10->I10->sing[1] + I10->I20->sing[2] + I10->I30->sing[3] + I10->I40->sing[4]
+        + I20->I10->sing[2] + I20->I20->sing[1] + I20->I30->sing[4] + I20->I40->sing[3]
+        + I30->I10->sing[3] + I30->I20->sing[4] + I30->I30->sing[2] + I30->I40->sing[1]
+        + I40->I10->sing[4] + I40->I20->sing[3] + I40->I30->sing[1] + I40->I40->sing[2])
+}
+// test expect {
+//     nondistinct_wfb: { isWellFormedIdx no b: Board | isWellFormedBoard[b] } for exactly 6 Int for NondistinctCageSolution is sat
+//     nondistinct_wfs: { isWellFormedIdx no s: Solution | isWellFormedSolution[s] } for exactly 6 Int for NondistinctCageSolution is sat
+//     nondistinct_solved: { isWellFormedIdx no s: Solution | isSolvedBoard[s] } for exactly 6 Int for NondistinctCageSolution is sat
+// }
 
 
 -- ====================================================================
