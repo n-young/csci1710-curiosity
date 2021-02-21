@@ -10,9 +10,11 @@ const labels = new Map([
 
 const unwrap = v => v.tuples()[0].atoms()[0]
 
+const cageValues = []
 const cageArray = Array(indexes.length)
   .fill()
   .map(() => Array(indexes.length).fill())
+
 Cage.atoms().forEach((cage, i) => {
   for (const cell of cage.join(cells).tuples()) {
     const [row, col] = cell.atoms()
@@ -25,14 +27,15 @@ Cage.atoms().forEach((cage, i) => {
         }`
       )
     }
-    cageArray[rowIdx][colIdx] = {
+    const cageInfo = {
       i,
       op: labels.get(unwrap(cage.join(operation))),
-      val: unwrap(cage.join(result))
+      val: intToNumber(unwrap(cage.join(result))),
     }
+    cageValues[i] = cageInfo
+    cageArray[rowIdx][colIdx] = cageInfo
   }
 })
-const table = document.createElement('table')
 const colors = [
   '#B10DC9',
   '#0074D9',
@@ -43,23 +46,21 @@ const colors = [
   '#FF4136',
   '#AAAAAA',
 ]
-for (const row of cageArray) {
+
+const valuesList = document.createElement('table')
+cageValues.forEach(({ val, op }, i) => {
   const tr = document.createElement('tr')
-  table.appendChild(tr)
-  for (const col of row) {
-    const td = document.createElement('td')
-    tr.appendChild(td)
-    td.textContent = col?.op + col?.val
-    td.style.backgroundColor = col != null ? colors[col.i] : 'transparent'
-    td.style.textAlign = 'center'
-    td.style.color = 'white'
-    td.style.width = '40px'
-    td.style.height = '40px'
-    td.style.border = 'none'
-  }
-}
-table.style.border = '1px solid black'
-table.style.margin = '1em'
+  tr.style.backgroundColor = colors[i]
+  tr.style.color = 'white'
+  tr.innerHTML = `<td>${val}</td><td>${op}</td>`
+  ;[...tr.children].forEach(c => (c.style.padding = '2px 8px'))
+  valuesList.appendChild(tr)
+})
+valuesList.style.float = 'left'
+valuesList.style.margin = '1em'
+valuesList.style.marginRight = '0.5em'
+valuesList.style.padding = '0'
+valuesList.style.borderCollapse = 'collapse'
 
 const solutionValues = Array(indexes.length)
   .fill()
@@ -71,30 +72,35 @@ for (const cell of Solution0.join(values).tuples()) {
   if (solutionValues[rowIdx][colIdx] != null) {
     throw new Error(
       `Dupe at ${rowIdx + 1}, ${colIdx + 1}: ${value} and ${
-        solutionValues[rowIdx][colIdx]
+        solutionValues[rowIdx][colIdx].value
       }`
     )
   }
-  solutionValues[rowIdx][colIdx] = intToNumber(value)
-}
-const table2 = document.createElement('table')
-for (const row of solutionValues) {
-  const tr = document.createElement('tr')
-  table2.appendChild(tr)
-  for (const col of row) {
-    const td = document.createElement('td')
-    tr.appendChild(td)
-    td.textContent = col
-    td.style.textAlign = 'center'
-    td.style.width = '40px'
-    td.style.height = '40px'
-    td.style.border = '1px solid black'
+  solutionValues[rowIdx][colIdx] = {
+    value: intToNumber(value),
+    i: cageArray[rowIdx][colIdx]?.i,
   }
 }
-table2.style.margin = '1em'
-table2.style.borderCollapse = 'collapse'
+const table = document.createElement('table')
+for (const row of solutionValues) {
+  const tr = document.createElement('tr')
+  table.appendChild(tr)
+  for (const { value, i } of row) {
+    const td = document.createElement('td')
+    tr.appendChild(td)
+    td.textContent = value
+    td.style.background = colors[i]
+    td.style.textAlign = 'center'
+    td.style.width = '32px'
+    td.style.height = '32px'
+    td.style.color = 'white'
+  }
+}
+table.style.border = '1px solid black'
+table.style.margin = 'calc(1em + 1px)'
+table.style.float = 'left'
 
 div.innerHTML = ''
+div.appendChild(valuesList)
 div.appendChild(table)
-div.appendChild(table2)
 
