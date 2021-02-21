@@ -187,41 +187,12 @@ example DivisionBig is { some cage: Cage | not isWellFormedCage[cage] } for {
 
 
 -- ====================================================================
--- TESTS (isWellFormedBoard)
--- ====================================================================
-
--- 4x4 normal board
-example NormalBoard is { isWellFormedIdx all board: Board | isWellFormedBoard[board] } for {
-    neighbor = I10->I20 + I20->I30 + I30->I40
-    Cage = Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7
-    cages = Board0->(Cage0 + Cage1 + Cage2 + Cage3 + Cage4 + Cage5 + Cage6 + Cage7)
-    operation = Cage0->Division0 + Cage1->Addition0 + Cage2->Addition0 + Cage3->Subtraction0
-        + Cage4->Subtraction0 + Cage5->Multiplication0 + Cage6->Subtraction0 + Cage7->Subtraction0
-    cells = Cage0->(I10->I10 + I10->I20)
-        + Cage1->(I10->I30 + I20->I30)
-        + Cage2->I10->I40
-        + Cage3->(I20->I10 + I30->I10)
-        + Cage4->(I20->I20 + I30->I20)
-        + Cage5->(I30->I30 + I40->I30 + I40->I40)
-        + Cage6->(I20->I40 + I30->I40)
-        + Cage7->(I40->I10 + I40->I20)
-    result = Cage0->sing[2] + Cage1->sing[7] + Cage2->sing[4] + Cage3->sing[1] + Cage4->sing[3]
-        + Cage5->sing[4] + Cage6->sing[2] + Cage7->sing[1]
-}
-
-
--- ====================================================================
--- TESTS (isWellFormedSolution)
--- ====================================================================
-
-
--- ====================================================================
 -- TESTS (isSolvedCage)
 -- ====================================================================
 
 
 -- ====================================================================
--- TESTS (isSolvedBoard)
+-- TESTS (isWellFormedBoard, isWellFormedSolution, isSolvedBoard)
 -- ====================================================================
 
 -- solution with nondistinct cage values
